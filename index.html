@@ -212,6 +212,65 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .btn-p:hover{background:var(--gold2);transform:translateY(-1px);}
 .btn-s{padding:8px 13px;background:transparent;color:var(--text);border:1px solid #444;border-radius:50px;font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;transition:.2s;}
 .btn-s:hover{border-color:var(--gold);color:var(--gold);}
+/* fix font size on mobile inputs to prevent zoom */
+.mfield input,.mfield select{font-size:16px;}
+
+/* ══ MOBILE BOTTOM SHEET ══ */
+#mobileSheet{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;flex-direction:column;max-height:72vh;transform:translateY(calc(100% - 58px));transition:transform .32s cubic-bezier(.4,0,.2,1);}
+#mobileSheet.open{transform:translateY(0);}
+.sheet-handle{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 8px;cursor:pointer;flex-shrink:0;gap:10px;}
+.sheet-pill{width:36px;height:4px;background:#444;border-radius:2px;margin:0 auto;}
+.sheet-title{font-size:.72rem;font-weight:500;color:var(--text);}
+.sheet-count{font-size:.63rem;color:var(--muted);background:var(--card);padding:3px 9px;border-radius:12px;}
+.sheet-inner{overflow-y:auto;padding:0 12px 80px;display:flex;flex-direction:column;gap:10px;}
+.sheet-inner::-webkit-scrollbar{display:none;}
+.mob-cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+.mob-cats::-webkit-scrollbar{display:none;}
+.mob-pgrid{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;}
+.mob-pgrid::-webkit-scrollbar{display:none;}
+.mob-pcard{background:var(--card);border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0;width:88px;position:relative;}
+.mob-pcard.on{border-color:var(--gold);}
+.mob-pcard .pthumb-wrap{height:68px;}
+.mob-pcard .pinfo{padding:4px 5px 5px;}
+.mob-pcard .pname{font-size:.6rem;}
+.mob-pcard .pdel{opacity:1;width:16px;height:16px;font-size:7px;}
+.mob-upload{border:2px dashed #333;border-radius:10px;padding:12px;text-align:center;cursor:pointer;position:relative;background:rgba(212,168,83,.03);}
+.mob-upload input{position:absolute;inset:0;opacity:0;width:100%;height:100%;}
+.mob-upload-title{font-size:.74rem;font-weight:500;color:var(--text);}
+.mob-upload-sub{font-size:.58rem;color:var(--muted);margin-top:2px;}
+.mob-sliders{display:flex;gap:8px;}
+.mob-sliders .crow{flex:1;}
+
+/* ══ MOBILE TOP TOOLBAR ══ */
+#mobileToolbar{display:none;position:fixed;top:0;left:0;right:0;z-index:250;background:rgba(12,12,14,.97);border-bottom:1px solid var(--border);padding:8px 12px;gap:6px;overflow-x:auto;}
+#mobileToolbar::-webkit-scrollbar{display:none;}
+.mtbtn{display:flex;align-items:center;gap:4px;padding:7px 12px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Outfit',sans-serif;font-size:.7rem;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.mtbtn:active,.mtbtn.on{background:var(--gold);color:#1a1000;border-color:var(--gold);font-weight:500;}
+
+/* pinch hint */
+#pinchHint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,12,.88);border:1px solid var(--gold);border-radius:12px;padding:10px 18px;font-size:.75rem;color:var(--gold);z-index:30;pointer-events:none;text-align:center;opacity:0;transition:opacity .4s;}
+#pinchHint.show{opacity:1;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:768px){
+  .sidebar{display:none!important;}
+  .toolbar{display:none!important;}
+  #mobileSheet{display:flex;}
+  #mobileToolbar{display:flex;}
+  .layout{grid-template-columns:1fr;}
+  header{padding:8px 14px;}
+  .logo{font-size:1.1rem;}
+  .badge{font-size:.5rem;padding:3px 7px;}
+  #hint{font-size:.6rem;padding:5px 10px;top:50px;white-space:normal;text-align:center;max-width:80vw;}
+  #toast{bottom:68px;}
+  #obj3dControls{left:8px;right:8px;transform:none;min-width:unset;bottom:66px;}
+  #startScr{padding:24px 20px;}
+  #startScr h2{font-size:1.45rem;}
+  .mode-cards{gap:10px;}
+  .mode-card{width:128px;padding:13px 10px;}
+  .modal-box{width:calc(100vw - 28px);max-width:380px;}
+  #savePanel > div{width:calc(100vw - 20px);max-width:420px;}
+}
 </style>
 </head>
 <body>
@@ -357,6 +416,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   <div class="tg">
     <button class="tbtn" id="btnCam"  onclick="startCamera()">📷 Camera</button>
     <button class="tbtn" id="btn3D"   onclick="start3DRoom()">🏠 3D Room</button>
+    <button class="tbtn" id="btnFlip" onclick="flipCamera()" style="display:none">🔄 Flip</button>
   </div>
   <div class="tg">
     <button class="tbtn" onclick="toggleGrid()" id="btnGrid">⊞ Grid</button>
@@ -365,6 +425,76 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
     <button class="tbtn" onclick="takeSnap()">📸 Snap</button>
   </div>
 </div>
+
+<!-- ── MOBILE TOP TOOLBAR ── -->
+<div id="mobileToolbar">
+  <button class="mtbtn" id="mbtnCam" onclick="startCamera()">📷 Camera</button>
+  <button class="mtbtn" id="mbtnRoom" onclick="start3DRoom()">🏠 3D Room</button>
+  <button class="mtbtn" id="mbtnFlip" onclick="flipCamera()" style="display:none">🔄 Flip Cam</button>
+  <button class="mtbtn" onclick="openSaveLoad()">💾 Save</button>
+  <button class="mtbtn" onclick="clearAll()">🗑️ Clear</button>
+  <button class="mtbtn" onclick="takeSnap()">📸 Snap</button>
+</div>
+
+<!-- ── MOBILE BOTTOM SHEET ── -->
+<div id="mobileSheet">
+  <div class="sheet-handle" onclick="toggleSheet()">
+    <div style="flex:1">
+      <div class="sheet-pill"></div>
+    </div>
+    <span class="sheet-title">🛋️ Products</span>
+    <span class="sheet-count" id="mobSheetCount">0 items</span>
+  </div>
+  <div class="sheet-inner">
+    <!-- Upload -->
+    <div class="mob-upload">
+      <input type="file" id="mobFileInput" accept="image/png,image/jpeg,image/webp,.glb,.gltf" multiple onchange="processFiles(Array.from(this.files))">
+      <div style="font-size:1.4rem">📁</div>
+      <div class="mob-upload-title">Tap to upload PNG or .glb</div>
+      <div class="mob-upload-sub">PNG = flat overlay · .glb = 3D model</div>
+    </div>
+    <!-- Categories -->
+    <div class="mob-cats" id="mobCats">
+      <button class="cat on" onclick="mobFilterCat(this,'all')">All</button>
+      <button class="cat" onclick="mobFilterCat(this,'sofa')">Sofas</button>
+      <button class="cat" onclick="mobFilterCat(this,'pillow')">Pillows</button>
+      <button class="cat" onclick="mobFilterCat(this,'lamp')">Lamps</button>
+      <button class="cat" onclick="mobFilterCat(this,'rug')">Rugs</button>
+      <button class="cat" onclick="mobFilterCat(this,'plant')">Plants</button>
+      <button class="cat" onclick="mobFilterCat(this,'other')">Other</button>
+    </div>
+    <!-- Products horizontal scroll -->
+    <div class="mob-pgrid" id="mobPgrid">
+      <div class="empty-state" style="min-width:200px"><div class="ei">🖼️</div><p style="font-size:.65rem">Upload PNG or .glb files</p></div>
+    </div>
+    <!-- Adjustments -->
+    <div class="slabel">Adjustments</div>
+    <div class="mob-sliders">
+      <div class="crow">
+        <span class="clabel">Size</span>
+        <input type="range" id="mobSzSlider" min="40" max="240" value="100" oninput="curScale=+this.value;document.getElementById('szSlider').value=this.value;document.getElementById('szVal').textContent=this.value+'%'">
+      </div>
+      <div class="crow">
+        <span class="clabel">Opacity</span>
+        <input type="range" id="mobOpSlider" min="30" max="100" value="95" oninput="setOpacity(this.value);document.getElementById('opSlider').value=this.value">
+      </div>
+    </div>
+    <!-- Tint -->
+    <div class="crow">
+      <span class="clabel">Tint</span>
+      <div class="swatches">
+        <div class="sw on" style="background:#c8a86e" onclick="setTint(this,'none')"></div>
+        <div class="sw" style="background:#c04840" onclick="setTint(this,'rgba(190,60,50,.25)')"></div>
+        <div class="sw" style="background:#4060c0" onclick="setTint(this,'rgba(50,90,190,.25)')"></div>
+        <div class="sw" style="background:#3c8c5a" onclick="setTint(this,'rgba(50,140,80,.25)')"></div>
+        <div class="sw" style="background:#8c50a0" onclick="setTint(this,'rgba(140,70,160,.25)')"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pinch hint -->
+<div id="pinchHint">👌 Pinch to resize · 🔄 Two fingers to rotate</div>
 
 <!-- ── SAVE / LOAD PANEL ── -->
 <div id="savePanel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
@@ -418,9 +548,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
-//  CORE STATE
+//  STATE
 // ═══════════════════════════════════════════════════════════
 let appMode = null; // 'camera' | '3d'
 let scene, camera3d, renderer;
@@ -431,37 +562,25 @@ let spherical={theta:Math.PI/4,phi:Math.PI/3,radius:8};
 let panOffset={x:0,y:0,z:0};
 let lastMouse={x:0,y:0};
 let gridOn=false;
-
-// Objects in scene
-let sceneObjects=[]; // {mesh, name, type:'glb'|'png3d', id}
-let selected3D=null; // for 3D room mode orbit-select
-let selectedCam3D=null; // for camera mode 3D object select
-
-// PNG overlay items
-let pngItems=[];
-let itemN=0;
-
-// Products catalog
+let sceneObjects=[];
+let selected3D=null, selectedCam3D=null;
+let pngItems=[], itemN=0;
 let products=[], pendingFiles=[], pendingIdx=0, pendingData=null;
 let currentCat='all', prodId=1;
 let curScale=100, curOpacity=0.95;
 let toastTimer;
+let currentFacingMode='environment';
+let sheetOpen=false, mobCurrentCat='all';
 
 // ═══════════════════════════════════════════════════════════
-//  THREE.JS — single renderer used in BOTH modes
-//  Camera mode: transparent bg (camera shows through)
-//  3D room mode: opaque room background
+//  THREE.JS INIT
 // ═══════════════════════════════════════════════════════════
 function initThree(){
   const canvas=document.getElementById('threeCanvas');
-  const w=canvas.clientWidth, h=canvas.clientHeight;
-
+  const w=canvas.clientWidth,h=canvas.clientHeight;
   scene=new THREE.Scene();
-
   camera3d=new THREE.PerspectiveCamera(50,w/h,0.1,100);
   updateCam();
-
-  // alpha:true is CRITICAL — allows transparent rendering over camera
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
   renderer.setSize(w,h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -470,66 +589,47 @@ function initThree(){
   renderer.outputEncoding=THREE.sRGBEncoding;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.2;
-
-  // Lights work in both modes
-  ambientLight=new THREE.AmbientLight(0xfff5e0,0.7);
-  scene.add(ambientLight);
-
+  ambientLight=new THREE.AmbientLight(0xfff5e0,0.7); scene.add(ambientLight);
   dirLight=new THREE.DirectionalLight(0xfff8f0,1.2);
-  dirLight.position.set(5,10,5);
-  dirLight.castShadow=true;
+  dirLight.position.set(5,10,5); dirLight.castShadow=true;
   dirLight.shadow.mapSize.width=dirLight.shadow.mapSize.height=2048;
   dirLight.shadow.camera.near=0.5;dirLight.shadow.camera.far=50;
   dirLight.shadow.camera.left=dirLight.shadow.camera.bottom=-10;
   dirLight.shadow.camera.right=dirLight.shadow.camera.top=10;
-  dirLight.shadow.bias=-0.001;dirLight.shadow.radius=4;
-  scene.add(dirLight);
-
+  dirLight.shadow.bias=-0.001;dirLight.shadow.radius=4; scene.add(dirLight);
   const fill=new THREE.DirectionalLight(0xa0c0ff,0.3);
-  fill.position.set(-5,3,-5);scene.add(fill);
-
+  fill.position.set(-5,3,-5); scene.add(fill);
   gridHelper=new THREE.GridHelper(10,20,0x444440,0x2a2a28);
-  gridHelper.position.y=0.001;gridHelper.visible=false;
-  scene.add(gridHelper);
-
+  gridHelper.position.y=0.001;gridHelper.visible=false; scene.add(gridHelper);
   raycaster=new THREE.Raycaster();
   mouse3d=new THREE.Vector2();
-
-  canvas.addEventListener('mousedown',onCanvasDown);
-  canvas.addEventListener('mousemove',onCanvasMove);
-  canvas.addEventListener('mouseup',()=>{isOrbiting=false;isPanning=false;});
-  canvas.addEventListener('wheel',onCanvasWheel,{passive:false});
-  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  const cv=document.getElementById('threeCanvas');
+  cv.addEventListener('mousedown',onCanvasDown);
+  cv.addEventListener('mousemove',onCanvasMove);
+  cv.addEventListener('mouseup',()=>{isOrbiting=false;isPanning=false;});
+  cv.addEventListener('wheel',onCanvasWheel,{passive:false});
+  cv.addEventListener('contextmenu',e=>e.preventDefault());
   window.addEventListener('resize',onResize);
   window.addEventListener('keydown',onKey);
-
+  wireTouch3DCam();
+  wireTouch3DRoom();
   requestAnimationFrame(loop);
 }
 
-function loop(){
-  requestAnimationFrame(loop);
-  if(renderer&&scene&&camera3d) renderer.render(scene,camera3d);
-}
+function loop(){requestAnimationFrame(loop);if(renderer&&scene&&camera3d)renderer.render(scene,camera3d);}
 
-// ── Apply camera mode: transparent bg ────────────────────
 function setCameraMode(){
-  scene.background=null;
-  scene.fog=null;
-  renderer.setClearColor(0x000000,0); // fully transparent
-  // Remove room geometry
+  scene.background=null; scene.fog=null;
+  renderer.setClearColor(0x000000,0);
   scene.children.filter(c=>c.userData.isRoom).forEach(c=>scene.remove(c));
-  // Camera stays fixed — no orbit in camera mode
-  camera3d.position.set(0,1.6,4);
-  camera3d.lookAt(0,1,0);
+  camera3d.position.set(0,1.6,4); camera3d.lookAt(0,1,0);
 }
 
-// ── Apply 3D room mode: opaque bg + room ─────────────────
 function set3DRoomMode(){
   scene.background=new THREE.Color(0x1a1510);
   scene.fog=new THREE.Fog(0x1a1510,15,40);
   renderer.setClearColor(0x1a1510,1);
-  buildRoom();
-  updateCam();
+  buildRoom(); updateCam();
 }
 
 function buildRoom(){
@@ -548,13 +648,13 @@ function buildRoom(){
   spot.position.set(2,5.8,-4);spot.target.position.set(2,0,0);spot.userData.isRoom=true;scene.add(spot);scene.add(spot.target);
 }
 
-// ── Orbit controls (3D room only) ────────────────────────
 function updateCam(){
   const{theta,phi,radius}=spherical;
   camera3d.position.set(radius*Math.sin(phi)*Math.sin(theta)+panOffset.x,radius*Math.cos(phi)+panOffset.y,radius*Math.sin(phi)*Math.cos(theta)+panOffset.z);
   camera3d.lookAt(panOffset.x,panOffset.y,panOffset.z);
 }
 
+// ── Mouse ──────────────────────────────────────────────────
 function onCanvasDown(e){
   lastMouse={x:e.clientX,y:e.clientY};
   if(appMode==='3d'){
@@ -565,34 +665,29 @@ function onCanvasDown(e){
       mouse3d.x=((e.clientX-rect.left)/rect.width)*2-1;
       mouse3d.y=-((e.clientY-rect.top)/rect.height)*2+1;
       raycaster.setFromCamera(mouse3d,camera3d);
-      const meshes=sceneObjects.map(o=>o.mesh);
-      const hits=raycaster.intersectObjects(meshes,true);
+      const hits=raycaster.intersectObjects(sceneObjects.map(o=>o.mesh),true);
       if(hits.length){
         let h=hits[0].object;
-        while(h.parent&&!sceneObjects.find(o=>o.mesh===h)) h=h.parent;
+        while(h.parent&&!sceneObjects.find(o=>o.mesh===h))h=h.parent;
         const found=sceneObjects.find(o=>o.mesh===h||o.mesh.getObjectById(h.id));
-        if(found) select3DObj(found);
+        if(found)select3DObj(found); else deselect3DObj();
       } else deselect3DObj();
     }
-  } else if(appMode==='camera'){
-    // In camera mode — click 3D objects
-    if(e.button===0){
-      const rect=renderer.domElement.getBoundingClientRect();
-      mouse3d.x=((e.clientX-rect.left)/rect.width)*2-1;
-      mouse3d.y=-((e.clientY-rect.top)/rect.height)*2+1;
-      raycaster.setFromCamera(mouse3d,camera3d);
-      const cam3dObjs=sceneObjects.filter(o=>o.camMode);
-      const hits=raycaster.intersectObjects(cam3dObjs.map(o=>o.mesh),true);
-      if(hits.length){
-        let h=hits[0].object;
-        while(h.parent&&!cam3dObjs.find(o=>o.mesh===h)) h=h.parent;
-        const found=cam3dObjs.find(o=>o.mesh===h||o.mesh.getObjectById(h.id));
-        if(found) selectCam3D(found);
-      } else deselectCam3D();
-    }
+  } else if(appMode==='camera'&&e.button===0){
+    const rect=renderer.domElement.getBoundingClientRect();
+    mouse3d.x=((e.clientX-rect.left)/rect.width)*2-1;
+    mouse3d.y=-((e.clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(mouse3d,camera3d);
+    const cam3dObjs=sceneObjects.filter(o=>o.camMode);
+    const hits=raycaster.intersectObjects(cam3dObjs.map(o=>o.mesh),true);
+    if(hits.length){
+      let h=hits[0].object;
+      while(h.parent&&!cam3dObjs.find(o=>o.mesh===h))h=h.parent;
+      const found=cam3dObjs.find(o=>o.mesh===h||o.mesh.getObjectById(h.id));
+      if(found)selectCam3D(found); else deselectCam3D();
+    } else deselectCam3D();
   }
 }
-
 function onCanvasMove(e){
   const dx=e.clientX-lastMouse.x,dy=e.clientY-lastMouse.y;
   lastMouse={x:e.clientX,y:e.clientY};
@@ -601,84 +696,64 @@ function onCanvasMove(e){
     if(isPanning){const s=spherical.radius*.001;panOffset.x-=dx*s*Math.cos(spherical.theta);panOffset.z-=dx*s*-Math.sin(spherical.theta);panOffset.y+=dy*s;updateCam();}
   }
 }
-
 function onCanvasWheel(e){
   e.preventDefault();
   if(appMode==='3d'){spherical.radius=Math.max(1.5,Math.min(20,spherical.radius+e.deltaY*.01));updateCam();}
 }
-
-function onKey(e){
-  // ── 3D Room mode keyboard ──────────────────────────────
-  if(appMode==='3d'&&selected3D){
-    const step=e.shiftKey?.05:.2, m=selected3D.mesh;
-    if(e.key==='w'||e.key==='ArrowUp')    { e.preventDefault(); m.position.z-=step; }
-    if(e.key==='s'||e.key==='ArrowDown')  { e.preventDefault(); m.position.z+=step; }
-    if(e.key==='a'||e.key==='ArrowLeft')  { e.preventDefault(); m.position.x-=step; }
-    if(e.key==='d'||e.key==='ArrowRight') { e.preventDefault(); m.position.x+=step; }
-    if(e.key==='q') m.position.y+=step;   // UP
-    if(e.key==='e') m.position.y-=step;   // DOWN
-    if(e.key==='r') m.rotation.y+=.1;
-    if(e.key==='f') m.rotation.y-=.1;
-    if(e.key==='Delete'||e.key==='Backspace') del3DObj(selected3D);
-  }
-  // ── Camera mode: 3D object keyboard ───────────────────
-  if(appMode==='camera'&&selectedCam3D){
-    const step=e.shiftKey?.05:.15, m=selectedCam3D.mesh;
-    if(e.key==='w'||e.key==='ArrowUp')    { e.preventDefault(); m.position.z-=step; }
-    if(e.key==='s'||e.key==='ArrowDown')  { e.preventDefault(); m.position.z+=step; }
-    if(e.key==='a'||e.key==='ArrowLeft')  { e.preventDefault(); m.position.x-=step; }
-    if(e.key==='d'||e.key==='ArrowRight') { e.preventDefault(); m.position.x+=step; }
-    if(e.key==='q') m.position.y+=step;   // UP
-    if(e.key==='e') m.position.y-=step;   // DOWN
-    if(e.key==='r') m.rotation.y+=.1;
-    if(e.key==='f') m.rotation.y-=.1;
-    if(e.key==='Delete'||e.key==='Backspace') del3DObj(selectedCam3D);
-  }
-  // ── Camera mode: PNG overlay keyboard ─────────────────
-  if(appMode==='camera'){
-    const sel=document.querySelector('.ar-item.sel');
-    if(sel){
-      const step=e.shiftKey?2:10;
-      if(e.key==='ArrowUp')    { e.preventDefault(); sel.dataset.cy=+sel.dataset.cy-step; applyPNG(sel); }
-      if(e.key==='ArrowDown')  { e.preventDefault(); sel.dataset.cy=+sel.dataset.cy+step; applyPNG(sel); }
-      if(e.key==='ArrowLeft')  { e.preventDefault(); sel.dataset.cx=+sel.dataset.cx-step; applyPNG(sel); }
-      if(e.key==='ArrowRight') { e.preventDefault(); sel.dataset.cx=+sel.dataset.cx+step; applyPNG(sel); }
-      if(e.key==='Delete'||e.key==='Backspace') pngDel(sel.id);
-    }
-  }
-}
-
 function onResize(){
   const c=document.getElementById('threeCanvas'),w=c.clientWidth,h=c.clientHeight;
   camera3d.aspect=w/h;camera3d.updateProjectionMatrix();renderer.setSize(w,h);
 }
+function onKey(e){
+  if(appMode==='3d'&&selected3D){
+    const step=e.shiftKey?.05:.2,m=selected3D.mesh;
+    if(e.key==='w'||e.key==='ArrowUp'){e.preventDefault();m.position.z-=step;}
+    if(e.key==='s'||e.key==='ArrowDown'){e.preventDefault();m.position.z+=step;}
+    if(e.key==='a'||e.key==='ArrowLeft'){e.preventDefault();m.position.x-=step;}
+    if(e.key==='d'||e.key==='ArrowRight'){e.preventDefault();m.position.x+=step;}
+    if(e.key==='q')m.position.y+=step;
+    if(e.key==='e')m.position.y-=step;
+    if(e.key==='r')m.rotation.y+=.1;
+    if(e.key==='f')m.rotation.y-=.1;
+    if(e.key==='Delete'||e.key==='Backspace')del3DObj(selected3D);
+  }
+  if(appMode==='camera'&&selectedCam3D){
+    const step=e.shiftKey?.05:.15,m=selectedCam3D.mesh;
+    if(e.key==='w'||e.key==='ArrowUp'){e.preventDefault();m.position.z-=step;}
+    if(e.key==='s'||e.key==='ArrowDown'){e.preventDefault();m.position.z+=step;}
+    if(e.key==='a'||e.key==='ArrowLeft'){e.preventDefault();m.position.x-=step;}
+    if(e.key==='d'||e.key==='ArrowRight'){e.preventDefault();m.position.x+=step;}
+    if(e.key==='q')m.position.y+=step;
+    if(e.key==='e')m.position.y-=step;
+    if(e.key==='r')m.rotation.y+=.1;
+    if(e.key==='f')m.rotation.y-=.1;
+    if(e.key==='Delete'||e.key==='Backspace')del3DObj(selectedCam3D);
+  }
+  if(appMode==='camera'){
+    const sel=document.querySelector('.ar-item.sel');
+    if(sel){
+      const step=e.shiftKey?2:10;
+      if(e.key==='ArrowUp'){e.preventDefault();sel.dataset.cy=+sel.dataset.cy-step;applyPNG(sel);}
+      if(e.key==='ArrowDown'){e.preventDefault();sel.dataset.cy=+sel.dataset.cy+step;applyPNG(sel);}
+      if(e.key==='ArrowLeft'){e.preventDefault();sel.dataset.cx=+sel.dataset.cx-step;applyPNG(sel);}
+      if(e.key==='ArrowRight'){e.preventDefault();sel.dataset.cx=+sel.dataset.cx+step;applyPNG(sel);}
+      if(e.key==='Delete'||e.key==='Backspace')pngDel(sel.id);
+    }
+  }
+}
 
-// ── 3D Object Selection (3D room mode) ───────────────────
+// ── 3D Object Selection ────────────────────────────────────
 function select3DObj(obj){
-  deselect3DObj(); selected3D=obj;
+  deselect3DObj();selected3D=obj;
   obj.mesh.traverse(c=>{if(c.isMesh){c.userData._oe=c.material.emissive?.getHex()||0;if(c.material.emissive)c.material.emissive.setHex(0x221800);}});
-  // Show the same control panel used in camera mode
-  document.getElementById('obj3dName').textContent=obj.name;
-  document.getElementById('obj3dControls').classList.add('show');
-  showToast(`${obj.name} — use controls panel · Q=up · E=down · WASD=move`);
+  showToast(`${obj.name} — WASD=move · Q/E=up/down · R/F=rotate · Del=remove`);
 }
 function deselect3DObj(){
   if(selected3D){selected3D.mesh.traverse(c=>{if(c.isMesh&&c.userData._oe!==undefined&&c.material.emissive)c.material.emissive.setHex(c.userData._oe);});}
   selected3D=null;
-  if(appMode==='3d') document.getElementById('obj3dControls').classList.remove('show');
 }
-function del3DObj(obj){
-  scene.remove(obj.mesh);
-  sceneObjects=sceneObjects.filter(o=>o!==obj);
-  if(selected3D===obj) deselect3DObj();
-  if(selectedCam3D===obj) deselectCam3D();
-  updateBadge(); showToast('Removed');
-}
-
-// ── Camera Mode 3D Object Selection ──────────────────────
 function selectCam3D(obj){
-  deselectCam3D(); selectedCam3D=obj;
-  // Highlight
+  deselectCam3D();selectedCam3D=obj;
   obj.mesh.traverse(c=>{if(c.isMesh){c.userData._oe2=c.material.emissive?.getHex()||0;if(c.material.emissive)c.material.emissive.setHex(0x331a00);}});
   document.getElementById('obj3dName').textContent=obj.name;
   document.getElementById('obj3dControls').classList.add('show');
@@ -688,29 +763,28 @@ function deselectCam3D(){
   selectedCam3D=null;
   document.getElementById('obj3dControls').classList.remove('show');
 }
-// ── Unified controls — work in BOTH camera and 3D room mode ──
-function getActiveObj(){
-  return appMode==='camera' ? selectedCam3D : selected3D;
+function del3DObj(obj){
+  scene.remove(obj.mesh);
+  sceneObjects=sceneObjects.filter(o=>o!==obj);
+  if(selected3D===obj)deselect3DObj();
+  if(selectedCam3D===obj)deselectCam3D();
+  updateBadge();showToast('Removed');
 }
-function moveObj(dir){
-  const obj=getActiveObj(); if(!obj)return;
-  const step=0.15, m=obj.mesh;
-  if(dir==='left')  m.position.x-=step;
-  if(dir==='right') m.position.x+=step;
-  if(dir==='fwd')   m.position.z-=step;
-  if(dir==='back')  m.position.z+=step;
-  if(dir==='up')    m.position.y+=step;
-  if(dir==='down')  m.position.y=Math.max(0, m.position.y-step); // don't go below floor
-}
-function rotateObj(d){ const obj=getActiveObj(); if(!obj)return; obj.mesh.rotation.y+=d*0.15; }
-function scaleObj(f){ const obj=getActiveObj(); if(!obj)return; obj.mesh.scale.multiplyScalar(f); }
-function deleteObj(){ const obj=getActiveObj(); if(!obj)return; del3DObj(obj); }
 
-// Keep old names as aliases so nothing breaks
-function move3dCam(dir){ moveObj(dir); }
-function rotate3dCam(d){ rotateObj(d); }
-function scale3dCam(f){ scaleObj(f); }
-function delete3dCam(){ deleteObj(); }
+// ── Camera mode 3D controls ────────────────────────────────
+function moveObj(dir){
+  const obj=selectedCam3D||selected3D; if(!obj)return;
+  const step=0.15,m=obj.mesh;
+  if(dir==='left')m.position.x-=step;
+  if(dir==='right')m.position.x+=step;
+  if(dir==='fwd')m.position.z-=step;
+  if(dir==='back')m.position.z+=step;
+  if(dir==='up')m.position.y+=step;
+  if(dir==='down')m.position.y-=step;
+}
+function rotateObj(d){const obj=selectedCam3D||selected3D;if(!obj)return;obj.mesh.rotation.y+=d*0.15;}
+function scaleObj(f){const obj=selectedCam3D||selected3D;if(!obj)return;obj.mesh.scale.multiplyScalar(f);}
+function deleteObj(){const obj=selectedCam3D||selected3D;if(obj)del3DObj(obj);}
 
 function toggleGrid(){gridOn=!gridOn;if(gridHelper)gridHelper.visible=gridOn;document.getElementById('btnGrid').classList.toggle('on',gridOn);}
 
@@ -718,9 +792,11 @@ function toggleGrid(){gridOn=!gridOn;if(gridHelper)gridHelper.visible=gridOn;doc
 //  MODE SWITCHING
 // ═══════════════════════════════════════════════════════════
 async function startCamera(){
-  if(!renderer) initThree();
+  if(!renderer)initThree();
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1920},height:{ideal:1080}}});
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:currentFacingMode},width:{ideal:1920},height:{ideal:1080}}
+    });
     const v=document.getElementById('camVideo');
     v.srcObject=stream;v.style.display='block';
     setCameraMode();
@@ -729,15 +805,19 @@ async function startCamera(){
     document.getElementById('modeBadge').textContent='Camera';
     document.getElementById('btnCam').classList.add('on');
     document.getElementById('btn3D').classList.remove('on');
+    document.getElementById('btnFlip').style.display='flex';
+    document.getElementById('mbtnCam')?.classList.add('on');
+    document.getElementById('mbtnRoom')?.classList.remove('on');
+    document.getElementById('mbtnFlip').style.display='flex';
     document.getElementById('hint').style.opacity='1';
-    document.getElementById('hint').innerHTML='<b>PNG</b>: drag · 🔵rotate · 🟡resize · arrows=move &nbsp;|&nbsp; <b>3D GLB</b>: click → WASD+Q/E(↑↓) or use buttons below';
+    document.getElementById('hint').innerHTML='<b>PNG</b>: drag·🔵rotate·🟡resize &nbsp;|&nbsp; <b>3D GLB</b>: tap to select·drag to move·pinch to resize';
     hideStart();
-    showToast('📷 Camera on! Upload PNG or .glb — both work here now');
+    showToast('📷 Camera on! Rear camera active. Tap 🔄 to flip.');
   }catch(e){showToast('Camera denied — switching to 3D Room',true);start3DRoom();}
 }
 
 function start3DRoom(){
-  if(!renderer) initThree();
+  if(!renderer)initThree();
   const v=document.getElementById('camVideo');
   if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
   v.style.display='none';
@@ -747,27 +827,56 @@ function start3DRoom(){
   document.getElementById('modeBadge').textContent='3D Room';
   document.getElementById('btnCam').classList.remove('on');
   document.getElementById('btn3D').classList.add('on');
+  document.getElementById('btnFlip').style.display='none';
+  document.getElementById('mbtnCam')?.classList.remove('on');
+  document.getElementById('mbtnRoom')?.classList.add('on');
+  document.getElementById('mbtnFlip').style.display='none';
+  document.getElementById('obj3dControls').classList.remove('show');
   document.getElementById('hint').style.opacity='1';
   document.getElementById('hint').innerHTML='<b>Left drag</b>=orbit · <b>Scroll</b>=zoom · <b>Click</b>=select · <b>WASD</b>=move · <b>Q/E</b>=up/down · <b>R/F</b>=rotate';
-  document.getElementById('obj3dControls').classList.remove('show');
   hideStart();
   showToast('🏠 3D Room — upload PNG or .glb to place furniture');
+}
+
+async function flipCamera(){
+  currentFacingMode=currentFacingMode==='environment'?'user':'environment';
+  const v=document.getElementById('camVideo');
+  if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:currentFacingMode},width:{ideal:1920},height:{ideal:1080}}
+    });
+    v.srcObject=stream;
+    showToast(currentFacingMode==='environment'?'📷 Rear camera':'🤳 Front camera');
+  }catch(e){
+    showToast('Could not switch camera',true);
+    currentFacingMode=currentFacingMode==='environment'?'user':'environment';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
 //  UPLOAD FLOW
 // ═══════════════════════════════════════════════════════════
-document.getElementById('fileInput').addEventListener('change',e=>processFiles(Array.from(e.target.files)));
-const uz=document.getElementById('uploadZone');
-uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
-uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
-uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');processFiles(Array.from(e.dataTransfer.files));});
-document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')||f.name.endsWith('.glb')));});
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('fileInput').addEventListener('change',e=>processFiles(Array.from(e.target.files)));
+  document.getElementById('mobFileInput')?.addEventListener('change',e=>processFiles(Array.from(e.target.files)));
+  const uz=document.getElementById('uploadZone');
+  if(uz){
+    uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+    uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+    uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');processFiles(Array.from(e.dataTransfer.files));});
+  }
+  document.addEventListener('dragover',e=>e.preventDefault());
+  document.addEventListener('drop',e=>{e.preventDefault();processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')||f.name.endsWith('.glb')));});
+});
 
 function processFiles(files){if(!files.length)return;pendingFiles=files;pendingIdx=0;doNext();}
 function doNext(){
-  if(pendingIdx>=pendingFiles.length){document.getElementById('fileInput').value='';return;}
+  if(pendingIdx>=pendingFiles.length){
+    try{document.getElementById('fileInput').value='';}catch(e){}
+    try{document.getElementById('mobFileInput').value='';}catch(e){}
+    return;
+  }
   const file=pendingFiles[pendingIdx];
   const isGLB=file.name.toLowerCase().endsWith('.glb')||file.name.toLowerCase().endsWith('.gltf');
   const reader=new FileReader();
@@ -785,7 +894,9 @@ function doNext(){
   };
   reader.readAsDataURL(file);
 }
-document.getElementById('modalName').addEventListener('keydown',e=>{if(e.key==='Enter')confirmModal();});
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('modalName').addEventListener('keydown',e=>{if(e.key==='Enter')confirmModal();});
+});
 function cancelModal(){document.getElementById('nameModal').classList.remove('on');pendingData=null;pendingIdx++;doNext();}
 function confirmModal(){
   const name=document.getElementById('modalName').value.trim()||'Product';
@@ -799,78 +910,68 @@ function confirmModal(){
 }
 
 function renderProducts(){
+  // Desktop grid
   const list=currentCat==='all'?products:products.filter(p=>p.cat===currentCat);
   const g=document.getElementById('pgrid');
-  if(!list.length){g.innerHTML=`<div class="empty-state"><div class="ei">${products.length?'🔍':'🖼️'}</div><p>${products.length?'No products in this category':'Upload PNG or .glb files — both work in all modes'}</p></div>`;return;}
-  g.innerHTML=list.map(p=>`
-    <div class="pcard" id="pc${p.id}" onclick="placeProduct(${p.id})">
-      <div class="pdel" onclick="removeProd(event,${p.id})">✕</div>
-      <div class="pthumb-wrap">
-        ${p.isGLB?`<div style="font-size:2rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%">📦</div>`:`<img class="pthumb" src="${p.url}">`}
-        <div class="ptype ${p.isGLB?'glb':'png'}">${p.isGLB?'3D GLB':'PNG'}</div>
-      </div>
-      <div class="pinfo"><div class="pname">${p.name}</div><div class="pcat">${p.cat}</div></div>
-    </div>`).join('');
+  if(g){
+    if(!list.length){g.innerHTML=`<div class="empty-state"><div class="ei">${products.length?'🔍':'🖼️'}</div><p>${products.length?'No products in this category':'Upload PNG or .glb files'}</p></div>`;}
+    else{g.innerHTML=list.map(p=>`
+      <div class="pcard" id="pc${p.id}" onclick="placeProduct(${p.id})">
+        <div class="pdel" onclick="removeProd(event,${p.id})">✕</div>
+        <div class="pthumb-wrap">
+          ${p.isGLB?`<div style="font-size:2rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%">📦</div>`:`<img class="pthumb" src="${p.url}">`}
+          <div class="ptype ${p.isGLB?'glb':'png'}">${p.isGLB?'3D GLB':'PNG'}</div>
+        </div>
+        <div class="pinfo"><div class="pname">${p.name}</div><div class="pcat">${p.cat}</div></div>
+      </div>`).join('');}
+  }
+  // Mobile grid
+  renderMobProducts();
+  updateBadge();
 }
-function filterCat(el,cat){document.querySelectorAll('.cat').forEach(c=>c.classList.remove('on'));el.classList.add('on');currentCat=cat;renderProducts();}
-function removeProd(e,id){e.stopPropagation();products=products.filter(p=>p.id!==id);renderProducts();showToast('Removed');}
+
+function filterCat(el,cat){
+  document.querySelectorAll('#cats .cat').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');currentCat=cat;renderProducts();
+}
+function removeProd(e,id){
+  e.stopPropagation();products=products.filter(p=>p.id!==id);
+  document.querySelectorAll(`[data-pid="${id}"]`).forEach(el=>el.remove());
+  renderProducts();showToast('Removed');
+}
 
 // ═══════════════════════════════════════════════════════════
-//  PLACE PRODUCT — works in BOTH modes
+//  PLACE PRODUCT
 // ═══════════════════════════════════════════════════════════
 function placeProduct(id){
   if(!appMode){showToast('Choose Camera or 3D Room first!',true);return;}
   const p=products.find(x=>x.id===id);if(!p)return;
-
-  if(p.isGLB){
-    // GLB works in BOTH modes — always loads into Three.js scene
-    placeGLB(p);
-  } else {
-    if(appMode==='camera'){
-      // PNG flat overlay on camera feed
-      placePNGoverlay(p);
-    } else {
-      // PNG as flat plane in 3D room
-      placePNG3D(p);
-    }
-  }
+  if(p.isGLB){placeGLB(p);}
+  else{if(appMode==='camera')placePNGoverlay(p);else placePNG3D(p);}
 }
 
-// ── GLB: load into Three.js scene (works camera + 3D room) ──
 function placeGLB(p){
   ensureGLTFLoader(()=>{
     showToast(`Loading 3D: ${p.name}...`);
     const loader=new THREE.GLTFLoader();
     loader.load(p.url,gltf=>{
       const model=gltf.scene;
-      // Auto-scale
       const box=new THREE.Box3().setFromObject(model);
       const size=box.getSize(new THREE.Vector3());
       const s=(curScale/100)*1.4/Math.max(size.x,size.y,size.z);
       model.scale.setScalar(s);
-      // Place on floor/forward
       const box2=new THREE.Box3().setFromObject(model);
-      if(appMode==='camera'){
-        // Place in front of camera view
-        model.position.set((Math.random()-.5)*1.5,-box2.min.y,-(1.5+Math.random()));
-      } else {
-        model.position.set((Math.random()-.5)*3,-box2.min.y,(Math.random()-.5)*3);
-      }
+      if(appMode==='camera'){model.position.set((Math.random()-.5)*1.5,-box2.min.y,-(1.5+Math.random()));}
+      else{model.position.set((Math.random()-.5)*3,-box2.min.y,(Math.random()-.5)*3);}
       model.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
       scene.add(model);
       const obj={id:Date.now(),mesh:model,name:p.name,type:'glb',camMode:appMode==='camera'};
       sceneObjects.push(obj);
       updateBadge();
-      if(appMode==='camera'){
-        selectCam3D(obj);
-        showToast(`✓ ${p.name} placed as 3D! Click it then use buttons below to move/rotate`);
-      } else {
-        select3DObj(obj);
-        showToast(`✓ ${p.name} placed! WASD to move · R/F to rotate`);
-      }
-    },xhr=>{
-      if(xhr.total) document.getElementById('toast').textContent=`Loading ${Math.round(xhr.loaded/xhr.total*100)}%...`;
-    },()=>showToast('Could not load .glb file',true));
+      if(appMode==='camera'){selectCam3D(obj);showToast(`✓ ${p.name} — tap it then drag to move · pinch to resize`);}
+      else{select3DObj(obj);showToast(`✓ ${p.name} placed! WASD to move · R/F to rotate`);}
+    },xhr=>{if(xhr.total)document.getElementById('toast').textContent=`Loading ${Math.round(xhr.loaded/xhr.total*100)}%...`;},
+    ()=>showToast('Could not load .glb file',true));
   });
 }
 
@@ -878,11 +979,11 @@ function ensureGLTFLoader(cb){
   if(window.THREE&&window.THREE.GLTFLoader){cb();return;}
   const s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-  s.onload=cb;s.onerror=()=>showToast('GLTFLoader failed to load',true);
+  s.onload=cb;s.onerror=()=>showToast('GLTFLoader failed',true);
   document.head.appendChild(s);
 }
 
-// ── PNG overlay on camera feed ───────────────────────────
+// ── PNG overlay on camera ──────────────────────────────────
 function placePNGoverlay(p){
   const vp=document.getElementById('mainArea');
   const sc=curScale/100;
@@ -893,7 +994,6 @@ function placePNGoverlay(p){
   const el=document.createElement('div');
   el.className='ar-item';el.id=eid;
   el.dataset.cx=x+w/2;el.dataset.cy=y+h/2;el.dataset.rot=0;el.dataset.w=w;el.dataset.h=h;
-  el.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
   el.innerHTML=`
     <div class="ar-toolbar">
       <div class="tb" onclick="pngSz('${eid}',1.13);ev(event)">＋</div>
@@ -912,9 +1012,8 @@ function placePNGoverlay(p){
   document.getElementById('pngLayer').appendChild(el);
   pngItems.push({el,name:p.name});
   pngSel(el);updateBadge();
-  showToast(`✓ ${p.name} placed · 🔵=rotate freely · 🟡=resize`);
+  showToast(`✓ ${p.name} placed · 🔵=rotate · 🟡=resize`);
 }
-
 function applyPNG(el){
   const cx=+el.dataset.cx,cy=+el.dataset.cy,w=+el.dataset.w,h=+el.dataset.h,r=+el.dataset.rot;
   el.style.left=(cx-w/2)+'px';el.style.top=(cy-h/2)+'px';
@@ -922,7 +1021,9 @@ function applyPNG(el){
   el.style.transformOrigin='center center';el.style.transform=`rotate(${r}deg)`;
 }
 function pngSel(el){document.querySelectorAll('.ar-item').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.style.zIndex=++itemN;}
-document.getElementById('pngLayer').addEventListener('mousedown',e=>{if(e.target.id==='pngLayer')document.querySelectorAll('.ar-item').forEach(e=>e.classList.remove('sel'));});
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('pngLayer').addEventListener('mousedown',e=>{if(e.target.id==='pngLayer')document.querySelectorAll('.ar-item').forEach(e=>e.classList.remove('sel'));});
+});
 
 function wirePNGDrag(el){
   let sx,sy,ocx,ocy;
@@ -939,7 +1040,6 @@ function wirePNGDrag(el){
   el.addEventListener('mousedown',down);el.addEventListener('touchstart',down,{passive:false});
   el.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.08:.93;const nw=+el.dataset.w*f,nh=+el.dataset.h*f;if(nw>35&&nw<700){el.dataset.w=nw;el.dataset.h=nh;applyPNG(el);}},{passive:false});
 }
-
 function wirePNGRot(el){
   const h=el.querySelector('.ar-rot');
   const down=e=>{
@@ -954,7 +1054,6 @@ function wirePNGRot(el){
   };
   h.addEventListener('mousedown',down);h.addEventListener('touchstart',down,{passive:false});
 }
-
 function wirePNGRes(el){
   const h=el.querySelector('.ar-res');
   const down=e=>{
@@ -963,27 +1062,25 @@ function wirePNGRes(el){
     const pt0=e.touches?e.touches[0]:e;
     const sd=Math.hypot((pt0.clientX-rect.left)-+el.dataset.cx,(pt0.clientY-rect.top)-+el.dataset.cy)||1;
     const sw=+el.dataset.w,sh=+el.dataset.h;
-    const mv=e=>{e.preventDefault();const pt=e.touches?e.touches[0]:e;const d=Math.hypot((pt.clientX-rect.left)-+el.dataset.cx,(pt.clientY-rect.top)-+el.dataset.cy);const f=d/sd;const nw=Math.max(35,Math.min(700,sw*f)),nh=Math.max(35,Math.min(700,sh*f));el.dataset.w=nw;el.dataset.h=nh;applyPNG(el);};
+    const mv=e=>{e.preventDefault();const pt=e.touches?e.touches[0]:e;const d=Math.hypot((pt.clientX-rect.left)-+el.dataset.cx,(pt.clientY-rect.top)-+el.dataset.cy);const f=d/sd;el.dataset.w=Math.max(35,Math.min(700,sw*f));el.dataset.h=Math.max(35,Math.min(700,sh*f));applyPNG(el);};
     const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);document.removeEventListener('touchmove',mv);document.removeEventListener('touchend',up);};
     document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',up);
   };
   h.addEventListener('mousedown',down);h.addEventListener('touchstart',down,{passive:false});
 }
-
 function pngSz(id,f){const el=document.getElementById(id);if(!el)return;el.dataset.w=+el.dataset.w*f;el.dataset.h=+el.dataset.h*f;applyPNG(el);}
 function pngFlip(id){const el=document.getElementById(id);if(!el)return;const img=el.querySelector('img');img._fx=(img._fx||1)*-1;img.style.transform=`scaleX(${img._fx})`;}
 function pngDel(id){const el=document.getElementById(id);if(!el)return;el.style.opacity='0';el.style.transition='opacity .22s';setTimeout(()=>el.remove(),230);pngItems=pngItems.filter(p=>p.el.id!==id);updateBadge();}
 function ev(e){e.stopPropagation();}
 
-// ── PNG flat plane in 3D room ─────────────────────────────
+// ── PNG flat in 3D room ────────────────────────────────────
 function placePNG3D(p){
   const loader=new THREE.TextureLoader();
   loader.load(p.url,tex=>{
     const asp=tex.image.width/tex.image.height,w=1.2*curScale/100,h=w/asp;
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8,side:THREE.DoubleSide}));
     mesh.position.set((Math.random()-.5)*4,h/2,(Math.random()-.5)*4);
-    mesh.castShadow=true;mesh.receiveShadow=true;
-    scene.add(mesh);
+    mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);
     const obj={id:Date.now(),mesh,name:p.name,type:'png3d',camMode:false};
     sceneObjects.push(obj);select3DObj(obj);updateBadge();
     showToast(`✓ ${p.name} placed in room`);
@@ -1000,7 +1097,11 @@ function clearAll(){
   sceneObjects.forEach(o=>scene&&scene.remove(o.mesh));sceneObjects=[];
   deselect3DObj();deselectCam3D();updateBadge();showToast('All cleared');
 }
-function updateBadge(){document.getElementById('itemBadge').textContent=`${pngItems.length+sceneObjects.length} items`;}
+function updateBadge(){
+  document.getElementById('itemBadge').textContent=`${pngItems.length+sceneObjects.length} items`;
+  document.getElementById('mobSheetCount').textContent=`${products.length} items`;
+  if(appMode)triggerAutoSave();
+}
 function takeSnap(){
   if(renderer){renderer.render(scene,camera3d);const url=renderer.domElement.toDataURL('image/png');const a=document.createElement('a');a.href=url;a.download='homelens.png';a.click();showToast('📸 Saved!');}
   else{const f=document.getElementById('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),280);}
@@ -1009,339 +1110,296 @@ function hideStart(){const s=document.getElementById('startScr');s.style.opacity
 function showToast(msg,warn=false){const t=document.getElementById('toast');t.textContent=msg;t.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),3500);}
 
 // ═══════════════════════════════════════════════════════════
-//  SAVE / LOAD SYSTEM
-//  Saves: product catalog (with base64 images) + PNG positions
-//         + 3D object positions/rotations/scales + mode + settings
-//  Storage: localStorage (5 named slots) + export/import as JSON file
+//  MOBILE UI
 // ═══════════════════════════════════════════════════════════
-const SLOTS = 5;
-const LS_KEY = 'homelens_saves';
-let autoSaveTimer = null;
-
-// ── Collect current room state into a plain object ────────
-function collectState(){
-  // Products catalog (include base64 url so images survive)
-  const prods = products.map(p=>({id:p.id,name:p.name,cat:p.cat,url:p.url,isGLB:p.isGLB,emoji:p.emoji}));
-
-  // PNG overlay items
-  const pngs = pngItems.map(item=>{
-    const el=item.el;
-    const img=el.querySelector('img');
-    // Find matching product url
-    const prodUrl=img?img.src:'';
-    return {
-      id:el.id,name:item.name,
-      cx:+el.dataset.cx,cy:+el.dataset.cy,
-      w:+el.dataset.w,h:+el.dataset.h,
-      rot:+el.dataset.rot,
-      opacity:img?parseFloat(img.style.opacity||1):1,
-      flipX:img?img._fx||1:1,
-      prodUrl
-    };
-  });
-
-  // 3D scene objects (GLB + PNG planes)
-  const objs3d = sceneObjects.map(o=>({
-    name:o.name,type:o.type,camMode:o.camMode,
-    px:o.mesh.position.x,py:o.mesh.position.y,pz:o.mesh.position.z,
-    rx:o.mesh.rotation.x,ry:o.mesh.rotation.y,rz:o.mesh.rotation.z,
-    sx:o.mesh.scale.x,sy:o.mesh.scale.y,sz:o.mesh.scale.z,
-    // store which product url this came from so we can reload
-    prodUrl: findProdUrlForMesh(o)
-  }));
-
-  return {
-    version:2,
-    mode:appMode,
-    prods,pngs,objs3d,
-    curScale,curOpacity,
-    tint:document.getElementById('tint').style.background||'transparent',
-    savedAt: new Date().toLocaleString()
-  };
+function toggleSheet(){
+  sheetOpen=!sheetOpen;
+  document.getElementById('mobileSheet').classList.toggle('open',sheetOpen);
+}
+function mobFilterCat(el,cat){
+  document.querySelectorAll('#mobCats .cat').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');mobCurrentCat=cat;renderMobProducts();
+}
+function renderMobProducts(){
+  const list=mobCurrentCat==='all'?products:products.filter(p=>p.cat===mobCurrentCat);
+  const g=document.getElementById('mobPgrid');if(!g)return;
+  if(!list.length){g.innerHTML=`<div class="empty-state" style="min-width:180px"><div class="ei">${products.length?'🔍':'🖼️'}</div><p style="font-size:.63rem">${products.length?'No products':'Upload files above'}</p></div>`;return;}
+  g.innerHTML=list.map(p=>`
+    <div class="mob-pcard" id="mpc${p.id}" onclick="placeProduct(${p.id});if(sheetOpen)toggleSheet()">
+      <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;background:rgba(192,80,74,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;cursor:pointer;z-index:5;" onclick="removeProd(event,${p.id})">✕</div>
+      <div class="pthumb-wrap">
+        ${p.isGLB?`<div style="font-size:1.8rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%">📦</div>`:`<img class="pthumb" src="${p.url}">`}
+        <div class="ptype ${p.isGLB?'glb':'png'}">${p.isGLB?'3D':'PNG'}</div>
+      </div>
+      <div class="pinfo"><div class="pname">${p.name}</div></div>
+    </div>`).join('');
 }
 
-function findProdUrlForMesh(obj){
-  // Try to match by name to a product
-  const p=products.find(x=>x.name===obj.name);
-  return p?p.url:'';
-}
-
-// ── Restore room state from saved object ─────────────────
-async function restoreState(state){
-  if(!state||!state.version) return;
-
-  // Restore products catalog first
-  if(state.prods){
-    products=state.prods.map(p=>({...p}));
-    prodId=Math.max(...products.map(p=>p.id),0)+1;
-    renderProducts();
-  }
-
-  // Restore settings
-  if(state.curScale){curScale=state.curScale;document.getElementById('szSlider').value=curScale;document.getElementById('szVal').textContent=curScale+'%';}
-  if(state.curOpacity){curOpacity=state.curOpacity;document.getElementById('opSlider').value=Math.round(curOpacity*100);document.getElementById('opVal').textContent=Math.round(curOpacity*100)+'%';}
-  if(state.tint) document.getElementById('tint').style.background=state.tint;
-
-  // Restore PNG overlays
-  document.getElementById('pngLayer').innerHTML='';
-  pngItems=[];
-  if(state.pngs){
-    state.pngs.forEach(saved=>{
-      // Find the product by url
-      const prod=products.find(p=>p.url===saved.prodUrl);
-      if(!prod) return;
-      const eid=saved.id||`png${++itemN}`;
-      const el=document.createElement('div');
-      el.className='ar-item';el.id=eid;
-      el.dataset.cx=saved.cx;el.dataset.cy=saved.cy;
-      el.dataset.rot=saved.rot||0;el.dataset.w=saved.w;el.dataset.h=saved.h;
-      el.innerHTML=`
-        <div class="ar-toolbar">
-          <div class="tb" onclick="pngSz('${eid}',1.13);ev(event)">＋</div>
-          <div class="tb" onclick="pngSz('${eid}',.88);ev(event)">－</div>
-          <div class="tb-sep"></div>
-          <div class="tb" onclick="pngFlip('${eid}');ev(event)">↔</div>
-          <div class="tb-sep"></div>
-          <div class="tb del" onclick="pngDel('${eid}');ev(event)">✕</div>
-        </div>
-        <div class="ar-rot" id="rot_${eid}">↻</div>
-        <img src="${prod.url}" draggable="false" style="opacity:${saved.opacity||curOpacity}">
-        <div class="ar-res" id="res_${eid}">⤡</div>
-        <div class="ar-lbl">${saved.name}</div>`;
-      const img=el.querySelector('img');
-      if(saved.flipX&&saved.flipX===-1){img._fx=-1;img.style.transform='scaleX(-1)';}
-      wirePNGDrag(el);wirePNGRot(el);wirePNGRes(el);
-      el.addEventListener('mousedown',e=>{if(!e.target.classList.contains('tb')&&!e.target.classList.contains('ar-rot')&&!e.target.classList.contains('ar-res'))pngSel(el);});
-      document.getElementById('pngLayer').appendChild(el);
-      applyPNG(el);
-      pngItems.push({el,name:saved.name});
-    });
-  }
-
-  // Restore 3D objects
-  sceneObjects.forEach(o=>{if(scene)scene.remove(o.mesh);});
-  sceneObjects=[];
-  if(state.objs3d&&scene){
-    for(const saved of state.objs3d){
-      const prod=products.find(p=>p.url===saved.prodUrl);
-      if(!prod) continue;
-      await new Promise(resolve=>{
-        if(prod.isGLB){
-          ensureGLTFLoader(()=>{
-            const loader=new THREE.GLTFLoader();
-            loader.load(prod.url,gltf=>{
-              const model=gltf.scene;
-              model.position.set(saved.px,saved.py,saved.pz);
-              model.rotation.set(saved.rx,saved.ry,saved.rz);
-              model.scale.set(saved.sx,saved.sy,saved.sz);
-              model.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
-              scene.add(model);
-              sceneObjects.push({id:Date.now(),mesh:model,name:saved.name,type:'glb',camMode:saved.camMode});
-              resolve();
-            },null,()=>resolve());
-          });
-        } else {
-          const loader=new THREE.TextureLoader();
-          loader.load(prod.url,tex=>{
-            const asp=tex.image.width/tex.image.height,w=saved.sx*1.2,h=w/asp;
-            const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1/asp),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8,side:THREE.DoubleSide}));
-            mesh.position.set(saved.px,saved.py,saved.pz);
-            mesh.rotation.set(saved.rx,saved.ry,saved.rz);
-            mesh.scale.set(saved.sx,saved.sy,saved.sz);
-            mesh.castShadow=true;mesh.receiveShadow=true;
-            scene.add(mesh);
-            sceneObjects.push({id:Date.now(),mesh,name:saved.name,type:'png3d',camMode:false});
-            resolve();
-          },null,()=>resolve());
-        }
-      });
+// ═══════════════════════════════════════════════════════════
+//  TOUCH — Camera mode 3D objects (drag + pinch + twist)
+// ═══════════════════════════════════════════════════════════
+function wireTouch3DCam(){
+  const canvas=document.getElementById('threeCanvas');
+  let t1=null,t2=null,startDist=0,startScale=null,startAngle=0,startRot=0,startPX=0,startPZ=0,startTX=0,startTZ=0;
+  let pinchHintShown=false;
+  canvas.addEventListener('touchstart',e=>{
+    if(appMode!=='camera')return;
+    const touches=Array.from(e.touches);
+    if(touches.length===1){
+      const rect=canvas.getBoundingClientRect();
+      mouse3d.x=((touches[0].clientX-rect.left)/rect.width)*2-1;
+      mouse3d.y=-((touches[0].clientY-rect.top)/rect.height)*2+1;
+      raycaster.setFromCamera(mouse3d,camera3d);
+      const cam3dObjs=sceneObjects.filter(o=>o.camMode);
+      const hits=raycaster.intersectObjects(cam3dObjs.map(o=>o.mesh),true);
+      if(hits.length){
+        let h=hits[0].object;
+        while(h.parent&&!cam3dObjs.find(o=>o.mesh===h))h=h.parent;
+        const found=cam3dObjs.find(o=>o.mesh===h||o.mesh.getObjectById(h.id));
+        if(found){selectCam3D(found);t1=touches[0];startPX=found.mesh.position.x;startPZ=found.mesh.position.z;startTX=touches[0].clientX;startTZ=touches[0].clientY;}
+      }
     }
-  }
-
-  updateBadge();
+    if(touches.length===2&&selectedCam3D){
+      t1=touches[0];t2=touches[1];
+      startDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+      startScale={x:selectedCam3D.mesh.scale.x,y:selectedCam3D.mesh.scale.y,z:selectedCam3D.mesh.scale.z};
+      startAngle=Math.atan2(t2.clientY-t1.clientY,t2.clientX-t1.clientX);
+      startRot=selectedCam3D.mesh.rotation.y;
+      if(!pinchHintShown){pinchHintShown=true;const h=document.getElementById('pinchHint');h.classList.add('show');setTimeout(()=>h.classList.remove('show'),2500);}
+      e.preventDefault();
+    }
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    if(appMode!=='camera'||!selectedCam3D)return;
+    e.preventDefault();
+    const touches=Array.from(e.touches);
+    if(touches.length===1&&t1&&!t2){
+      selectedCam3D.mesh.position.x=startPX+(touches[0].clientX-startTX)*0.008;
+      selectedCam3D.mesh.position.z=startPZ+(touches[0].clientY-startTZ)*0.008;
+    }
+    if(touches.length===2&&t2){
+      const cur1=touches[0],cur2=touches[1];
+      const curDist=Math.hypot(cur2.clientX-cur1.clientX,cur2.clientY-cur1.clientY);
+      const f=curDist/startDist;
+      selectedCam3D.mesh.scale.set(Math.max(.05,Math.min(10,startScale.x*f)),Math.max(.05,Math.min(10,startScale.y*f)),Math.max(.05,Math.min(10,startScale.z*f)));
+      selectedCam3D.mesh.rotation.y=startRot+(Math.atan2(cur2.clientY-cur1.clientY,cur2.clientX-cur1.clientX)-startAngle);
+    }
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{if(e.touches.length<2)t2=null;if(e.touches.length===0)t1=null;});
 }
 
-// ── localStorage helpers ──────────────────────────────────
-function getSaves(){
-  try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch{return {};}
-}
-function setSaves(saves){
-  try{localStorage.setItem(LS_KEY,JSON.stringify(saves));}catch(e){showToast('Storage full — try exporting as file',true);}
+// ═══════════════════════════════════════════════════════════
+//  TOUCH — 3D Room (orbit + pinch zoom + long press move)
+// ═══════════════════════════════════════════════════════════
+function wireTouch3DRoom(){
+  const canvas=document.getElementById('threeCanvas');
+  let longPressTimer=null,isMovingObj=false,tSX=0,tSZ=0,startObjX=0,startObjZ=0;
+  let pinch1=null,pinch2=null,startPinchDist=0,startSphR=0;
+  canvas.addEventListener('touchstart',e=>{
+    if(appMode!=='3d')return;
+    const touches=Array.from(e.touches);
+    if(touches.length===1){
+      tSX=touches[0].clientX;tSZ=touches[0].clientY;
+      lastMouse={x:touches[0].clientX,y:touches[0].clientY};
+      isOrbiting=true;
+      if(selected3D){
+        longPressTimer=setTimeout(()=>{
+          isMovingObj=true;isOrbiting=false;
+          startObjX=selected3D.mesh.position.x;startObjZ=selected3D.mesh.position.z;
+          showToast('Drag to move object');
+        },300);
+      }
+    }
+    if(touches.length===2){
+      isOrbiting=false;isMovingObj=false;clearTimeout(longPressTimer);
+      pinch1=touches[0];pinch2=touches[1];
+      startPinchDist=Math.hypot(pinch2.clientX-pinch1.clientX,pinch2.clientY-pinch1.clientY);
+      startSphR=spherical.radius;e.preventDefault();
+    }
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    if(appMode!=='3d')return;e.preventDefault();
+    const touches=Array.from(e.touches);
+    if(touches.length===1){
+      const dx=touches[0].clientX-lastMouse.x,dy=touches[0].clientY-lastMouse.y;
+      lastMouse={x:touches[0].clientX,y:touches[0].clientY};
+      if(isMovingObj&&selected3D){
+        selected3D.mesh.position.x=startObjX+(touches[0].clientX-tSX)*0.008;
+        selected3D.mesh.position.z=startObjZ+(touches[0].clientY-tSZ)*0.008;
+      } else if(isOrbiting){
+        clearTimeout(longPressTimer);
+        spherical.theta-=dx*.008;spherical.phi=Math.max(.1,Math.min(Math.PI/2-.02,spherical.phi+dy*.008));updateCam();
+      }
+    }
+    if(touches.length===2&&pinch2){
+      const cur1=touches[0],cur2=touches[1];
+      const curDist=Math.hypot(cur2.clientX-cur1.clientX,cur2.clientY-cur1.clientY);
+      spherical.radius=Math.max(1.5,Math.min(20,startSphR*(startPinchDist/curDist)));updateCam();
+      if(selected3D){const curA=Math.atan2(cur2.clientY-cur1.clientY,cur2.clientX-cur1.clientX);const sa=Math.atan2(pinch2.clientY-pinch1.clientY,pinch2.clientX-pinch1.clientX);selected3D.mesh.rotation.y+=(curA-sa);pinch1=cur1;pinch2=cur2;}
+    }
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{
+    if(appMode!=='3d')return;
+    clearTimeout(longPressTimer);isOrbiting=false;isMovingObj=false;
+    if(e.touches.length===0){pinch1=null;pinch2=null;}
+    const mx=Math.abs(e.changedTouches[0].clientX-tSX),my=Math.abs(e.changedTouches[0].clientY-tSZ);
+    if(mx<8&&my<8){
+      const rect=canvas.getBoundingClientRect();
+      mouse3d.x=((e.changedTouches[0].clientX-rect.left)/rect.width)*2-1;
+      mouse3d.y=-((e.changedTouches[0].clientY-rect.top)/rect.height)*2+1;
+      raycaster.setFromCamera(mouse3d,camera3d);
+      const hits=raycaster.intersectObjects(sceneObjects.map(o=>o.mesh),true);
+      if(hits.length){let h=hits[0].object;while(h.parent&&!sceneObjects.find(o=>o.mesh===h))h=h.parent;const found=sceneObjects.find(o=>o.mesh===h||o.mesh.getObjectById(h.id));if(found)select3DObj(found);else deselect3DObj();}
+      else deselect3DObj();
+    }
+  });
 }
 
-// ── Auto-save (debounced, saves to slot 0 "Auto") ─────────
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD
+// ═══════════════════════════════════════════════════════════
+const SLOTS=5, LS_KEY='homelens_saves';
+let autoSaveTimer=null;
 function triggerAutoSave(){
   clearTimeout(autoSaveTimer);
   autoSaveTimer=setTimeout(()=>{
     const saves=getSaves();
     saves['auto']={...collectState(),label:'Auto Save'};
     setSaves(saves);
-    // Update badge
     const badge=document.getElementById('autoSaveBadge');
-    if(badge){badge.textContent='Saved '+new Date().toLocaleTimeString();}
+    if(badge)badge.textContent='Saved '+new Date().toLocaleTimeString();
   },1500);
 }
-
-// Hook auto-save into all state-changing functions
-const _origUpdateBadge=updateBadge;
-function updateBadge(){
-  _origUpdateBadge();
-  if(appMode) triggerAutoSave();
+function collectState(){
+  const prods=products.map(p=>({id:p.id,name:p.name,cat:p.cat,url:p.url,isGLB:p.isGLB,emoji:p.emoji}));
+  const pngs=pngItems.map(item=>{
+    const el=item.el,img=el.querySelector('img');
+    return{id:el.id,name:item.name,cx:+el.dataset.cx,cy:+el.dataset.cy,w:+el.dataset.w,h:+el.dataset.h,rot:+el.dataset.rot,opacity:img?parseFloat(img.style.opacity||1):1,flipX:img?img._fx||1:1,prodUrl:img?img.src:''};
+  });
+  const objs3d=sceneObjects.map(o=>({name:o.name,type:o.type,camMode:o.camMode,px:o.mesh.position.x,py:o.mesh.position.y,pz:o.mesh.position.z,rx:o.mesh.rotation.x,ry:o.mesh.rotation.y,rz:o.mesh.rotation.z,sx:o.mesh.scale.x,sy:o.mesh.scale.y,sz:o.mesh.scale.z,prodUrl:findProdUrlForMesh(o)}));
+  return{version:2,mode:appMode,prods,pngs,objs3d,curScale,curOpacity,tint:document.getElementById('tint').style.background||'transparent',savedAt:new Date().toLocaleString()};
 }
-
-// ── Save to a named slot ──────────────────────────────────
+function findProdUrlForMesh(obj){const p=products.find(x=>x.name===obj.name);return p?p.url:'';}
+async function restoreState(state){
+  if(!state||!state.version)return;
+  if(state.prods){products=state.prods.map(p=>({...p}));prodId=Math.max(...products.map(p=>p.id),0)+1;renderProducts();}
+  if(state.curScale){curScale=state.curScale;document.getElementById('szSlider').value=curScale;document.getElementById('szVal').textContent=curScale+'%';}
+  if(state.curOpacity){curOpacity=state.curOpacity;document.getElementById('opSlider').value=Math.round(curOpacity*100);document.getElementById('opVal').textContent=Math.round(curOpacity*100)+'%';}
+  if(state.tint)document.getElementById('tint').style.background=state.tint;
+  document.getElementById('pngLayer').innerHTML='';pngItems=[];
+  if(state.pngs){
+    state.pngs.forEach(saved=>{
+      const prod=products.find(p=>p.url===saved.prodUrl);if(!prod)return;
+      const eid=saved.id||`png${++itemN}`;
+      const el=document.createElement('div');
+      el.className='ar-item';el.id=eid;el.dataset.cx=saved.cx;el.dataset.cy=saved.cy;el.dataset.rot=saved.rot||0;el.dataset.w=saved.w;el.dataset.h=saved.h;
+      el.innerHTML=`<div class="ar-toolbar"><div class="tb" onclick="pngSz('${eid}',1.13);ev(event)">＋</div><div class="tb" onclick="pngSz('${eid}',.88);ev(event)">－</div><div class="tb-sep"></div><div class="tb" onclick="pngFlip('${eid}');ev(event)">↔</div><div class="tb-sep"></div><div class="tb del" onclick="pngDel('${eid}');ev(event)">✕</div></div><div class="ar-rot" id="rot_${eid}">↻</div><img src="${prod.url}" draggable="false" style="opacity:${saved.opacity||curOpacity}"><div class="ar-res" id="res_${eid}">⤡</div><div class="ar-lbl">${saved.name}</div>`;
+      const img=el.querySelector('img');if(saved.flipX&&saved.flipX===-1){img._fx=-1;img.style.transform='scaleX(-1)';}
+      wirePNGDrag(el);wirePNGRot(el);wirePNGRes(el);
+      el.addEventListener('mousedown',e=>{if(!e.target.classList.contains('tb')&&!e.target.classList.contains('ar-rot')&&!e.target.classList.contains('ar-res'))pngSel(el);});
+      document.getElementById('pngLayer').appendChild(el);applyPNG(el);pngItems.push({el,name:saved.name});
+    });
+  }
+  sceneObjects.forEach(o=>{if(scene)scene.remove(o.mesh);});sceneObjects=[];
+  if(state.objs3d&&scene){
+    for(const saved of state.objs3d){
+      const prod=products.find(p=>p.url===saved.prodUrl);if(!prod)continue;
+      await new Promise(resolve=>{
+        if(prod.isGLB){
+          ensureGLTFLoader(()=>{
+            const loader=new THREE.GLTFLoader();
+            loader.load(prod.url,gltf=>{
+              const model=gltf.scene;model.position.set(saved.px,saved.py,saved.pz);model.rotation.set(saved.rx,saved.ry,saved.rz);model.scale.set(saved.sx,saved.sy,saved.sz);
+              model.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+              scene.add(model);sceneObjects.push({id:Date.now(),mesh:model,name:saved.name,type:'glb',camMode:saved.camMode});resolve();
+            },null,()=>resolve());
+          });
+        } else {
+          const loader=new THREE.TextureLoader();
+          loader.load(prod.url,tex=>{
+            const asp=tex.image.width/tex.image.height;
+            const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1/asp),new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.8,side:THREE.DoubleSide}));
+            mesh.position.set(saved.px,saved.py,saved.pz);mesh.rotation.set(saved.rx,saved.ry,saved.rz);mesh.scale.set(saved.sx,saved.sy,saved.sz);
+            mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);sceneObjects.push({id:Date.now(),mesh,name:saved.name,type:'png3d',camMode:false});resolve();
+          },null,()=>resolve());
+        }
+      });
+    }
+  }
+  updateBadge();
+}
+function getSaves(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch{return {};}}
+function setSaves(saves){try{localStorage.setItem(LS_KEY,JSON.stringify(saves));}catch(e){showToast('Storage full — export as file',true);}}
 function saveToSlot(slotKey){
   const label=prompt('Name this save:',slotKey==='auto'?'Auto Save':`Room ${slotKey}`);
-  if(label===null) return;
-  const saves=getSaves();
-  saves[slotKey]={...collectState(),label:label||`Room ${slotKey}`};
-  setSaves(saves);
-  renderSaveSlots();
-  showToast(`✓ Saved as "${label||`Room ${slotKey}`}"`);
+  if(label===null)return;
+  const saves=getSaves();saves[slotKey]={...collectState(),label:label||`Room ${slotKey}`};setSaves(saves);renderSaveSlots();showToast(`✓ Saved as "${label}"`);
 }
-
-// ── Load from slot ────────────────────────────────────────
 async function loadFromSlot(slotKey){
-  const saves=getSaves();
-  const state=saves[slotKey];
-  if(!state){showToast('Nothing saved in this slot',true);return;}
+  const saves=getSaves();const state=saves[slotKey];
+  if(!state){showToast('Nothing saved here',true);return;}
   closeSaveLoad();
-  // Need a mode active to restore into
-  if(!appMode){
-    if(state.mode==='camera') await startCamera();
-    else start3DRoom();
-    await new Promise(r=>setTimeout(r,600));
-  }
-  await restoreState(state);
-  showToast(`✓ Room loaded: "${state.label}"`);
+  if(!appMode){if(state.mode==='camera')await startCamera();else start3DRoom();await new Promise(r=>setTimeout(r,600));}
+  await restoreState(state);showToast(`✓ Room loaded: "${state.label}"`);
 }
-
-// ── Delete slot ───────────────────────────────────────────
-function deleteSlot(slotKey){
-  const saves=getSaves();
-  delete saves[slotKey];
-  setSaves(saves);
-  renderSaveSlots();
-  showToast('Save deleted');
-}
-
-// ── Render save slots UI ──────────────────────────────────
+function deleteSlot(slotKey){const saves=getSaves();delete saves[slotKey];setSaves(saves);renderSaveSlots();showToast('Save deleted');}
 function renderSaveSlots(){
-  const saves=getSaves();
-  const container=document.getElementById('saveSlots');
-  if(!container) return;
-
-  // Auto save row
+  const saves=getSaves();const container=document.getElementById('saveSlots');if(!container)return;
   const auto=saves['auto'];
-  let html=`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
-      <div style="flex:1;">
-        <div style="font-size:.72rem;font-weight:500;color:var(--text);">🔄 Auto Save</div>
-        <div id="autoSaveBadge" style="font-size:.63rem;color:var(--muted);">${auto?'Last saved: '+auto.savedAt:'No auto-save yet'}</div>
-      </div>
-      ${auto?`
-        <div style="font-size:.62rem;color:var(--muted);background:#1a1a1c;padding:3px 8px;border-radius:8px;">${(auto.pngs?.length||0)+(auto.objs3d?.length||0)} items</div>
-        <button onclick="loadFromSlot('auto')" style="padding:5px 12px;background:var(--gold);color:#1a1000;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;">Load</button>
-      `:'<span style="font-size:.63rem;color:var(--muted);">Place items to auto-save</span>'}
-    </div>`;
-
-  // Manual slots 1-5
+  let html=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+    <div style="flex:1;"><div style="font-size:.72rem;font-weight:500;color:var(--text);">🔄 Auto Save</div>
+    <div id="autoSaveBadge" style="font-size:.63rem;color:var(--muted);">${auto?'Last: '+auto.savedAt:'No auto-save yet'}</div></div>
+    ${auto?`<div style="font-size:.62rem;color:var(--muted);background:#1a1a1c;padding:3px 8px;border-radius:8px;">${(auto.pngs?.length||0)+(auto.objs3d?.length||0)} items</div>
+    <button onclick="loadFromSlot('auto')" style="padding:5px 12px;background:var(--gold);color:#1a1000;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;">Load</button>`:'<span style="font-size:.63rem;color:var(--muted);">Place items to auto-save</span>'}
+  </div>`;
   for(let i=1;i<=SLOTS;i++){
-    const key=`slot${i}`;
-    const s=saves[key];
-    html+=`
-      <div style="background:var(--surface);border:1px solid ${s?'var(--border)':'#222'};border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
-        <div style="font-size:1rem;flex-shrink:0;">${s?'🏠':'📭'}</div>
-        <div style="flex:1;">
-          <div style="font-size:.72rem;font-weight:500;color:${s?'var(--text)':'var(--muted)'};">${s?s.label:`Slot ${i} — Empty`}</div>
-          <div style="font-size:.61rem;color:var(--muted);">${s?`${s.savedAt} · ${(s.pngs?.length||0)+(s.objs3d?.length||0)} items`:'—'}</div>
-        </div>
-        <button onclick="saveToSlot('${key}')" style="padding:5px 10px;background:var(--surface);color:var(--muted);border:1px solid #333;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.68rem;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='#333';this.style.color='var(--muted)'">${s?'Overwrite':'Save here'}</button>
-        ${s?`
-          <button onclick="loadFromSlot('${key}')" style="padding:5px 12px;background:var(--gold);color:#1a1000;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;">Load</button>
-          <button onclick="deleteSlot('${key}')" style="width:26px;height:26px;background:rgba(192,80,74,.15);color:var(--red);border:1px solid rgba(192,80,74,.3);border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Delete">✕</button>
-        `:''}
-      </div>`;
+    const key=`slot${i}`,s=saves[key];
+    html+=`<div style="background:var(--surface);border:1px solid ${s?'var(--border)':'#222'};border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:1rem;flex-shrink:0;">${s?'🏠':'📭'}</div>
+      <div style="flex:1;"><div style="font-size:.72rem;font-weight:500;color:${s?'var(--text)':'var(--muted)'};">${s?s.label:`Slot ${i} — Empty`}</div>
+      <div style="font-size:.61rem;color:var(--muted);">${s?`${s.savedAt} · ${(s.pngs?.length||0)+(s.objs3d?.length||0)} items`:'—'}</div></div>
+      <button onclick="saveToSlot('${key}')" style="padding:5px 10px;background:var(--surface);color:var(--muted);border:1px solid #333;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.68rem;cursor:pointer;">${s?'Overwrite':'Save here'}</button>
+      ${s?`<button onclick="loadFromSlot('${key}')" style="padding:5px 12px;background:var(--gold);color:#1a1000;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;">Load</button>
+      <button onclick="deleteSlot('${key}')" style="width:26px;height:26px;background:rgba(192,80,74,.15);color:var(--red);border:1px solid rgba(192,80,74,.3);border-radius:50%;font-size:10px;cursor:pointer;">✕</button>`:''}
+    </div>`;
   }
   container.innerHTML=html;
 }
-
-// ── Export as JSON file ───────────────────────────────────
 function exportLayout(){
-  const state=collectState();
-  state.label=prompt('Name this export:','My Room')||'My Room';
+  const state=collectState();state.label=prompt('Name this export:','My Room')||'My Room';
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=`homelens-${state.label.replace(/\s+/g,'-')}.json`;
-  a.click();URL.revokeObjectURL(url);
-  showToast(`✓ Exported as "${state.label}.json"`);
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`homelens-${state.label.replace(/\s+/g,'-')}.json`;a.click();URL.revokeObjectURL(url);
+  showToast(`✓ Exported`);
 }
-
-// ── Import from JSON file ─────────────────────────────────
 function importLayout(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=async ev=>{
-    try{
-      const state=JSON.parse(ev.target.result);
-      closeSaveLoad();
-      if(!appMode){
-        if(state.mode==='camera') await startCamera();
-        else start3DRoom();
-        await new Promise(r=>setTimeout(r,600));
-      }
-      await restoreState(state);
-      showToast(`✓ Room imported: "${state.label||'Room'}"`);
-    }catch(e){showToast('Invalid file — please use a HomeLens .json file',true);}
+    try{const state=JSON.parse(ev.target.result);closeSaveLoad();if(!appMode){if(state.mode==='camera')await startCamera();else start3DRoom();await new Promise(r=>setTimeout(r,600));}await restoreState(state);showToast(`✓ Room imported`);}
+    catch(e){showToast('Invalid file',true);}
   };
-  reader.readAsText(file);
-  input.value='';
+  reader.readAsText(file);input.value='';
 }
+function openSaveLoad(){renderSaveSlots();document.getElementById('savePanel').style.display='flex';}
+function closeSaveLoad(){document.getElementById('savePanel').style.display='none';}
 
-// ── Open / Close panel ────────────────────────────────────
-function openSaveLoad(){
-  renderSaveSlots();
-  document.getElementById('savePanel').style.display='flex';
-}
-function closeSaveLoad(){
-  document.getElementById('savePanel').style.display='none';
-}
-
-// ── Auto-load on startup (restore last auto-save) ─────────
 window.addEventListener('load',()=>{
   const saves=getSaves();
   if(saves['auto']&&saves['auto'].prods?.length){
-    // Show restore prompt after a short delay
     setTimeout(()=>{
       const banner=document.createElement('div');
       banner.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(10,10,12,.95);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;z-index:400;display:flex;align-items:center;gap:14px;backdrop-filter:blur(12px);white-space:nowrap;';
-      banner.innerHTML=`
-        <div>
-          <div style="font-size:.75rem;font-weight:500;color:var(--cream);">🏠 Previous room found</div>
-          <div style="font-size:.65rem;color:var(--muted);">${saves['auto'].savedAt} · ${(saves['auto'].pngs?.length||0)+(saves['auto'].objs3d?.length||0)} items</div>
-        </div>
-        <button onclick="restoreAutoSave(this.parentElement)" style="padding:6px 16px;background:var(--gold);color:#1a1000;border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;">Restore</button>
-        <button onclick="this.parentElement.remove()" style="padding:6px 12px;background:transparent;color:var(--muted);border:1px solid #333;border-radius:20px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer;">Dismiss</button>
-      `;
-      document.body.appendChild(banner);
-      setTimeout(()=>banner.remove(),12000);
+      banner.innerHTML=`<div><div style="font-size:.75rem;font-weight:500;color:var(--cream);">🏠 Previous room found</div><div style="font-size:.65rem;color:var(--muted);">${saves['auto'].savedAt}</div></div>
+      <button onclick="restoreAutoSave(this.parentElement)" style="padding:6px 16px;background:var(--gold);color:#1a1000;border:none;border-radius:20px;font-family:'Outfit',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;">Restore</button>
+      <button onclick="this.parentElement.remove()" style="padding:6px 12px;background:transparent;color:var(--muted);border:1px solid #333;border-radius:20px;font-family:'Outfit',sans-serif;font-size:.72rem;cursor:pointer;">Dismiss</button>`;
+      document.body.appendChild(banner);setTimeout(()=>banner.remove(),12000);
     },1200);
   }
 });
-
 async function restoreAutoSave(banner){
-  banner.remove();
-  const saves=getSaves();
-  if(!saves['auto']) return;
-  const state=saves['auto'];
-  if(!appMode){
-    if(state.mode==='camera') await startCamera();
-    else start3DRoom();
-    await new Promise(r=>setTimeout(r,700));
-  }
-  await restoreState(state);
-  showToast(`✓ Room restored! ${(state.pngs?.length||0)+(state.objs3d?.length||0)} items loaded`);
+  banner.remove();const saves=getSaves();if(!saves['auto'])return;const state=saves['auto'];
+  if(!appMode){if(state.mode==='camera')await startCamera();else start3DRoom();await new Promise(r=>setTimeout(r,700));}
+  await restoreState(state);showToast(`✓ Room restored!`);
 }
 </script>
 </body>
